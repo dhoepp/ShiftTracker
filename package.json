@@ -1,0 +1,22 @@
+{
+  "name": "shift-tracker",
+  "version": "1.0.0",
+  "description": "Hourly completion tracker for shift work",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --mac"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.shifttracker.app",
+    "productName": "Shift Tracker",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": "dmg"
+    }
+  }
+}

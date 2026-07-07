@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Shift Tracker — Settings</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+      background: #141418;
+      color: white;
+      padding: 24px 22px 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h2 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 22px;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.28);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      margin-top: 18px;
+    }
+
+    .field-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .field-label {
+      font-size: 13px;
+      color: rgba(255,255,255,0.65);
+    }
+
+    input[type="time"],
+    input[type="number"] {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: white;
+      font-size: 13px;
+      padding: 6px 10px;
+      outline: none;
+      font-family: inherit;
+      text-align: center;
+    }
+
+    input[type="time"]   { width: 112px; }
+    input[type="number"] { width: 72px; }
+
+    input:focus {
+      border-color: rgba(74, 222, 128, 0.45);
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      margin: 14px 0 0;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 10px;
+    }
+
+    .toggle-row label {
+      font-size: 13px;
+      color: rgba(255,255,255,0.65);
+      cursor: pointer;
+    }
+
+    input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      accent-color: #4ade80;
+      cursor: pointer;
+    }
+
+    .auto-note {
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+      margin: -4px 0 10px;
+    }
+
+    .field-row.disabled { opacity: 0.3; pointer-events: none; }
+
+    .btn-save {
+      display: block;
+      width: 100%;
+      padding: 11px;
+      background: #4ade80;
+      color: #071a0e;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 20px;
+      font-family: inherit;
+      transition: background 0.15s;
+      letter-spacing: -0.2px;
+    }
+
+    .btn-save:hover  { background: #86efac; }
+    .btn-save:active { transform: scale(0.98); }
+
+    .saved-msg {
+      text-align: center;
+      font-size: 12px;
+      color: #4ade80;
+      margin-top: 10px;
+      height: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Settings</h2>
+
+  <div class="section-label">Shift</div>
+
+  <div class="field-row">
+    <span class="field-label">Shift Start</span>
+    <input type="time" id="shift-start" value="06:00">
+  </div>
+  <div class="field-row">
+    <span class="field-label">Shift End</span>
+    <input type="time" id="shift-end" value="15:00">
+  </div>
+
+  <hr>
+  <div class="section-label">Lunch</div>
+
+  <div class="field-row">
+    <span class="field-label">Lunch Start</span>
+    <input type="time" id="lunch-start" value="10:00">
+  </div>
+  <div class="field-row">
+    <span class="field-label">Lunch End</span>
+    <input type="time" id="lunch-end" value="11:00">
+  </div>
+
+  <hr>
+  <div class="section-label">Goals</div>
+
+  <div class="field-row">
+    <span class="field-label">Daily Goal</span>
+    <input type="number" id="daily-goal" min="1" max="999" value="40">
+  </div>
+
+  <div class="toggle-row">
+    <input type="checkbox" id="custom-hourly">
+    <label for="custom-hourly">Set custom hourly goal</label>
+  </div>
+
+  <div class="auto-note" id="auto-note">Auto-calculated: 5 / hour (8 work hours)</div>
+
+  <div class="field-row" id="hourly-row">
+    <span class="field-label">Hourly Goal</span>
+    <input type="number" id="hourly-goal" min="1" max="99" value="5">
+  </div>
+
+  <button class="btn-save" id="btn-save">Save Settings</button>
+  <div class="saved-msg" id="saved-msg"></div>
+
+  <script src="settings-renderer.js"></script>
+</body>
+</html>

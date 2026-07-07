@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Shift Tracker</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 300px;
+      height: 250px;
+      background: transparent;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+    }
+
+    #app {
+      width: 300px;
+      height: 250px;
+      background: rgba(18, 18, 22, 0.93);
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.07);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      display: flex;
+      flex-direction: column;
+      padding: 14px 16px 12px;
+      -webkit-app-region: drag;
+      color: white;
+      position: relative;
+    }
+
+    #app * { -webkit-app-region: no-drag; }
+
+    /* ---- Header ---- */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .hour-label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+
+    .daily-pill {
+      background: rgba(255,255,255,0.07);
+      border-radius: 20px;
+      padding: 2px 9px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.55);
+    }
+
+    .daily-pill .num {
+      color: rgba(255,255,255,0.9);
+      font-weight: 700;
+    }
+
+    /* ---- Main score ---- */
+    .score-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      margin: 4px 0 2px;
+      gap: 2px;
+    }
+
+    .score-big {
+      font-size: 56px;
+      font-weight: 800;
+      line-height: 1;
+      transition: color 0.3s;
+    }
+
+    .score-big.on-track { color: #4ade80; }
+    .score-big.behind   { color: #ff6b6b; }
+    .score-big.neutral  { color: white; }
+
+    .score-denom {
+      font-size: 22px;
+      color: rgba(255,255,255,0.3);
+      font-weight: 400;
+    }
+
+    .deficit-row {
+      text-align: center;
+      font-size: 10px;
+      color: #ff6b6b;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      height: 14px;
+      margin-bottom: 2px;
+    }
+
+    /* ---- Progress bar ---- */
+    .progress-wrap {
+      height: 3px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 2px;
+      margin-bottom: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: #4ade80;
+      transition: width 0.4s ease, background 0.3s;
+    }
+
+    .progress-fill.behind { background: #ff6b6b; }
+
+    .timer-row {
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .timer-countdown {
+      font-size: 26px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.5px;
+      color: rgba(255,255,255,0.35);
+      transition: color 0.5s;
+      line-height: 1;
+    }
+
+    .timer-countdown.warn   { color: #fb923c; }
+    .timer-countdown.urgent { color: #ef4444; }
+
+    /* ---- Buttons ---- */
+    .btn-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 8px 4px;
+      border: none;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.12s;
+      font-family: inherit;
+      letter-spacing: -0.2px;
+    }
+
+    .btn:active { transform: scale(0.95); opacity: 0.85; }
+
+    .btn-plus1 {
+      background: #4ade80;
+      color: #071a0e;
+      font-size: 17px;
+      flex: 1.4;
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.09);
+      color: rgba(255,255,255,0.75);
+    }
+
+    .bottom-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-mini {
+      padding: 3px 8px;
+      border: none;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.35);
+      transition: all 0.12s;
+    }
+
+    .btn-mini:hover  { background: rgba(255,255,255,0.09); color: rgba(255,255,255,0.65); }
+    .btn-mini:active { transform: scale(0.94); }
+
+    .btn-mini.red       { color: rgba(255, 100, 100, 0.45); }
+    .btn-mini.red:hover { background: rgba(255,80,80,0.1); color: #ff8080; }
+
+    .btn-mini.pin         { opacity: 0.9; }
+    .btn-mini.pin.pinned  { opacity: 1; filter: none; }
+    .btn-mini.pin.unpinned { opacity: 0.3; filter: grayscale(1); }
+
+    /* ---- Lunch ---- */
+    .lunch-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .lunch-emoji { font-size: 32px; }
+    .lunch-title { font-size: 15px; color: rgba(255,255,255,0.45); font-weight: 500; }
+    .lunch-sub   { font-size: 10px; color: rgba(255,255,255,0.2); margin-top: 2px; }
+
+    /* ---- Off shift ---- */
+    .off-body {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: rgba(255,255,255,0.25);
+    }
+
+    /* ---- Overlays ---- */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(12, 12, 17, 0.97);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      z-index: 50;
+    }
+
+    .overlay.hidden { display: none; }
+
+    .overlay-title {
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+      padding: 0 24px;
+      line-height: 1.5;
+    }
+
+    .overlay-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .overlay-btns .btn { min-width: 88px; }
+
+    .btn-confirm { background: #ff6b6b; color: white; }
+
+    .custom-input {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.13);
+      border-radius: 9px;
+      color: white;
+      font-size: 28px;
+      font-weight: 800;
+      text-align: center;
+      width: 110px;
+      padding: 8px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .custom-input:focus { border-color: rgba(74, 222, 128, 0.5); }
+
+    /* Hide section helper */
+    .hidden { display: none !important; }
+
+    /* Dock canvas (never visible) */
+    #dock-canvas { position: absolute; left: -9999px; top: -9999px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+
+    <!-- Work-hour UI -->
+    <div id="work-ui">
+      <div class="header">
+        <div class="hour-label" id="hour-label">Loading…</div>
+        <div class="daily-pill">
+          <span class="num" id="daily-done">0</span>/<span id="daily-goal">40</span>
+        </div>
+      </div>
+
+      <div class="score-row">
+        <span class="score-big neutral" id="score-big">0</span>
+        <span class="score-denom">/<span id="score-denom">5</span></span>
+      </div>
+
+      <div class="deficit-row" id="deficit-row"></div>
+
+      <div class="progress-wrap">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+
+      <div class="timer-row">
+        <div class="timer-countdown" id="timer-countdown">--:--</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-plus1"    id="btn-plus1">+1</button>
+        <button class="btn btn-secondary" id="btn-hour">Complete Hour</button>
+        <button class="btn btn-secondary" id="btn-custom">Custom</button>
+      </div>
+
+      <div class="bottom-row">
+        <button class="btn-mini"         id="btn-undo">↩ Undo</button>
+        <button class="btn-mini pin pinned" id="btn-pin" title="Toggle always on top">📌</button>
+        <button class="btn-mini"         id="btn-options">⚙ ▾</button>
+        <button class="btn-mini red"     id="btn-day">Complete Day</button>
+      </div>
+    </div>
+
+    <!-- Lunch UI -->
+    <div id="lunch-ui" class="hidden">
+      <div class="header">
+        <div class="hour-label" id="lunch-hour-label">Lunch</div>
+        <div class="daily-pill">
+          <span class="num" id="lunch-daily-done">0</span>/<span id="lunch-daily-goal">40</span>
+        </div>
+      </div>
+      <div class="lunch-body">
+        <div class="lunch-emoji">🍽</div>
+        <div class="lunch-title">Lunch Break</div>
+        <div class="lunch-sub">Completions still count toward daily total</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-plus1"    id="lunch-btn-plus1">+1</button>
+        <button class="btn btn-secondary" id="lunch-btn-custom">Custom</button>
+      </div>
+      <div class="bottom-row">
+        <button class="btn-mini" id="lunch-btn-undo">↩ Undo</button>
+        <button class="btn-mini pin pinned" id="lunch-btn-pin" title="Toggle always on top">📌</button>
+        <button class="btn-mini" id="lunch-btn-options">⚙ ▾</button>
+      </div>
+    </div>
+
+    <!-- Off-shift UI -->
+    <div id="off-ui" class="hidden">
+      <div class="header">
+        <div class="hour-label" id="off-hour-label">Outside Shift</div>
+        <div class="daily-pill">
+          <span class="num" id="off-daily-done">0</span>/<span id="off-daily-goal">40</span>
+        </div>
+      </div>
+      <div class="lunch-body">
+        <div class="lunch-emoji">⏰</div>
+        <div class="lunch-title" id="off-shift-label">Outside Shift</div>
+        <div class="lunch-sub">Counts toward today's total</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-plus1"     id="off-btn-plus1">+1</button>
+        <button class="btn btn-secondary" id="off-btn-custom">Custom</button>
+      </div>
+      <div class="bottom-row">
+        <button class="btn-mini" id="off-btn-undo">↩ Undo</button>
+        <button class="btn-mini pin pinned" id="off-btn-pin" title="Toggle always on top">📌</button>
+        <button class="btn-mini" id="off-btn-options">⚙ ▾</button>
+      </div>
+    </div>
+
+    <!-- Confirm overlay -->
+    <div class="overlay hidden" id="overlay-confirm">
+      <div class="overlay-title" id="confirm-msg">Are you sure?</div>
+      <div class="overlay-btns">
+        <button class="btn btn-confirm" id="confirm-yes">Confirm</button>
+        <button class="btn btn-secondary" id="confirm-no">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Custom amount overlay -->
+    <div class="overlay hidden" id="overlay-custom">
+      <div class="overlay-title" id="custom-label">Add to this hour</div>
+      <input class="custom-input" id="custom-input" type="number" min="1" max="99" value="1">
+      <div class="overlay-btns">
+        <button class="btn btn-plus1" id="custom-ok">Add</button>
+        <button class="btn btn-secondary" id="custom-cancel">Cancel</button>
+      </div>
+    </div>
+
+  </div>
+
+  <canvas id="dock-canvas" width="128" height="128"></canvas>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
