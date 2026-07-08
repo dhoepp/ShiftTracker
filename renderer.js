@@ -25,7 +25,7 @@ async function init() {
   });
 
   window.tracker.onUpdateDownloaded(version => {
-    // Windows only — show restart prompt
+    $('update-overlay-msg').textContent = `Version ${version} is ready to install. Restart now?`;
     showOverlay('overlay-update');
   });
 

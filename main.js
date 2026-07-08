@@ -8,6 +8,7 @@ if (!gotLock) { app.quit(); }
 
 let mainWindow = null;
 let settingsWindow = null;
+let aboutWindow = null;
 let tray = null;
 let stateFile = null;
 let state = null;
@@ -24,6 +25,7 @@ const DEFAULT_SETTINGS = {
   dailyGoal: 40,
   hourlyGoal: 5,
   customHourly: false,
+  betaUpdates: false,
 };
 
 // ---- State ----
@@ -281,16 +283,7 @@ ipcMain.handle('show-options-menu', (e) => {
     },
     {
       label: 'About Shift Tracker',
-      click: () => {
-        const { dialog } = require('electron');
-        dialog.showMessageBox(mainWindow, {
-          type: 'info',
-          title: 'Shift Tracker',
-          message: 'Shift Tracker v1.0.0',
-          detail: 'Hourly completion tracker.\nStay consistent. One hour at a time.',
-          buttons: ['OK'],
-        });
-      },
+      click: openAbout,
     },
     { type: 'separator' },
     {
@@ -318,6 +311,16 @@ ipcMain.on('dock-icon-data', (e, dataURL) => {
 
 ipcMain.on('open-settings', () => openSettings());
 ipcMain.on('install-update', () => { isQuitting = true; autoUpdater.quitAndInstall(); });
+
+ipcMain.handle('get-version',  () => app.getVersion());
+ipcMain.handle('open-external', (e, url) => shell.openExternal(url));
+ipcMain.handle('get-beta-pref', () => state.settings.betaUpdates || false);
+ipcMain.handle('set-beta-pref', (e, enabled) => {
+  state.settings.betaUpdates = enabled;
+  saveState();
+  autoUpdater.allowPrerelease = enabled;
+  if (app.isPackaged) autoUpdater.checkForUpdates().catch(() => {});
+});
 
 // ---- Broadcast ----
 
@@ -524,6 +527,26 @@ function openSettings() {
   settingsWindow.on('closed', () => { settingsWindow = null; });
 }
 
+function openAbout() {
+  if (aboutWindow && !aboutWindow.isDestroyed()) {
+    aboutWindow.focus();
+    return;
+  }
+  aboutWindow = new BrowserWindow({
+    width: 320,
+    height: 300,
+    title: 'About Shift Tracker',
+    resizable: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  aboutWindow.loadFile('about.html');
+  aboutWindow.on('closed', () => { aboutWindow = null; });
+}
+
 // ---- Auto-updater ----
 
 function initUpdater() {
@@ -532,6 +555,7 @@ function initUpdater() {
   autoUpdater.logger = null; // silence verbose logs
   autoUpdater.autoDownload = process.platform !== 'darwin'; // Windows only: silent download
   autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.allowPrerelease = state.settings.betaUpdates === true;
 
   autoUpdater.on('update-available', (info) => {
     if (process.platform === 'darwin') {

@@ -12,6 +12,10 @@ contextBridge.exposeInMainWorld('tracker', {
   showOptionsMenu:   ()                 => ipcRenderer.invoke('show-options-menu'),
   openSettings:      ()                 => ipcRenderer.send('open-settings'),
   sendDockIcon:      (dataURL)          => ipcRenderer.send('dock-icon-data', dataURL),
+  getVersion:        ()                 => ipcRenderer.invoke('get-version'),
+  openExternal:      (url)              => ipcRenderer.invoke('open-external', url),
+  getBetaPref:       ()                 => ipcRenderer.invoke('get-beta-pref'),
+  setBetaPref:       (enabled)          => ipcRenderer.invoke('set-beta-pref', enabled),
 
   onStateUpdate:        (cb) => ipcRenderer.on('state-update',         (_, s) => cb(s)),
   onUpdateDockIcon:     (cb) => ipcRenderer.on('update-dock-icon',     (_, d) => cb(d)),
