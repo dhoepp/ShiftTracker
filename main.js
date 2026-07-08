@@ -264,6 +264,22 @@ ipcMain.handle('show-options-menu', (e) => {
     },
     { type: 'separator' },
     {
+      label: 'Check for Updates',
+      click: () => {
+        if (!app.isPackaged) {
+          notify('Shift Tracker', 'Update checks only run in the installed app.');
+          return;
+        }
+        autoUpdater.checkForUpdates()
+          .then(result => {
+            if (!result || result.updateInfo.version === app.getVersion()) {
+              notify('Shift Tracker', 'You are on the latest version.');
+            }
+          })
+          .catch(() => notify('Shift Tracker', 'Could not check for updates.'));
+      },
+    },
+    {
       label: 'About Shift Tracker',
       click: () => {
         const { dialog } = require('electron');
