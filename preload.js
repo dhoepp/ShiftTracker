@@ -16,4 +16,6 @@ contextBridge.exposeInMainWorld('tracker', {
   onStateUpdate:        (cb) => ipcRenderer.on('state-update',         (_, s) => cb(s)),
   onUpdateDockIcon:     (cb) => ipcRenderer.on('update-dock-icon',     (_, d) => cb(d)),
   onAlwaysOnTopChanged: (cb) => ipcRenderer.on('always-on-top-changed',(_, v) => cb(v)),
+  onUpdateDownloaded:   (cb) => ipcRenderer.on('update-downloaded',    (_, v) => cb(v)),
+  installUpdate:        ()   => ipcRenderer.send('install-update'),
 });

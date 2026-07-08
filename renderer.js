@@ -24,6 +24,11 @@ async function init() {
     updatePinButtons(pinned);
   });
 
+  window.tracker.onUpdateDownloaded(version => {
+    // Windows only — show restart prompt
+    showOverlay('overlay-update');
+  });
+
   setupButtons();
   setInterval(tickTimer, 1000);
 }
@@ -224,6 +229,10 @@ function setupButtons() {
     currentState = await window.tracker.undoLast();
     render(currentState);
   });
+
+  // Update overlay
+  $('update-restart').addEventListener('click', () => window.tracker.installUpdate());
+  $('update-later').addEventListener('click', () => hideOverlay('overlay-update'));
 
   // Confirm overlay
   $('confirm-yes').addEventListener('click', () => {

@@ -1,6 +1,7 @@
-const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, Notification, screen } = require('electron');
+const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, Notification, screen, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { autoUpdater } = require('electron-updater');
 
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) { app.quit(); }
@@ -296,6 +297,7 @@ ipcMain.on('dock-icon-data', (e, dataURL) => {
 });
 
 ipcMain.on('open-settings', () => openSettings());
+ipcMain.on('install-update', () => { isQuitting = true; autoUpdater.quitAndInstall(); });
 
 // ---- Broadcast ----
 
@@ -502,12 +504,50 @@ function openSettings() {
   settingsWindow.on('closed', () => { settingsWindow = null; });
 }
 
+// ---- Auto-updater ----
+
+function initUpdater() {
+  if (!app.isPackaged) return; // skip in dev — updater only runs in built app
+
+  autoUpdater.logger = null; // silence verbose logs
+  autoUpdater.autoDownload = process.platform !== 'darwin'; // Windows only: silent download
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.on('update-available', (info) => {
+    if (process.platform === 'darwin') {
+      // Mac: can't auto-install unsigned builds — open releases page instead
+      notify(
+        'Update Available',
+        `Version ${info.version} is ready. Click to download.`
+      );
+      shell.openExternal('https://github.com/dhoepp/ShiftTracker/releases/latest');
+    }
+    // Windows: download starts silently, prompt comes on 'update-downloaded'
+  });
+
+  autoUpdater.on('update-downloaded', (info) => {
+    // Windows: prompt to restart
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('update-downloaded', info.version);
+    }
+  });
+
+  autoUpdater.on('error', (err) => {
+    console.error('Updater error:', err?.message || err);
+  });
+
+  // Check on startup, then every 4 hours
+  setTimeout(() => autoUpdater.checkForUpdates().catch(() => {}), 5000);
+  setInterval(() => autoUpdater.checkForUpdates().catch(() => {}), 4 * 60 * 60 * 1000);
+}
+
 // ---- App lifecycle ----
 
 app.whenReady().then(() => {
   initState();
   createMainWindow();
   createTray();
+  initUpdater();
 
   checkInterval = setInterval(checkAlerts, 30000);
 
