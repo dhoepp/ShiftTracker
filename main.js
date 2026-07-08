@@ -131,11 +131,15 @@ function recalcTotal() {
 
 function getDeficit(slots, currentIdx) {
   const hGoal = getHourlyGoal();
-  let deficit = 0;
+  let totalExpected = 0;
+  let totalDone = 0;
   for (let i = 0; i < currentIdx; i++) {
-    if (!slots[i].isLunch) deficit += Math.max(0, hGoal - getSlotCount(i));
+    if (!slots[i].isLunch) {
+      totalExpected += hGoal;
+      totalDone += getSlotCount(i);
+    }
   }
-  return deficit;
+  return Math.max(0, totalExpected - totalDone);
 }
 
 // ---- Render state ----
