@@ -1,6 +1,6 @@
 {
   "name": "shift-tracker",
-  "version": "1.1.1-beta.1",
+  "version": "1.1.1-beta.2",
   "description": "Hourly completion tracker for shift work",
   "main": "main.js",
   "scripts": {
