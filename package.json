@@ -23,7 +23,7 @@
       "provider": "github",
       "owner": "dhoepp",
       "repo": "ShiftTracker",
-      "releaseType": "release"
+      "releaseType": "prerelease"
     },
     "mac": {
       "category": "public.app-category.productivity",
