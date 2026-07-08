@@ -26,7 +26,6 @@ jobs:
         run: npm run build -- --mac --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EP_RELEASE_TYPE: prerelease
 
   build-windows:
     name: Build Beta (Windows)
@@ -47,4 +46,3 @@ jobs:
         run: npm run build -- --win --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EP_RELEASE_TYPE: prerelease
